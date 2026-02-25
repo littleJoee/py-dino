@@ -12,7 +12,7 @@ class Entity:
         self.action = ''
         self.anim_offset = (0, 0)
 
-    def update(self, y_floor=200, movement=(0, 0)):
+    def update(self, y_floor=190, movement=(0, 0)):
 
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
@@ -49,14 +49,18 @@ class Player(Entity):
         super().__init__(game, 'player', pos, size)
         self.can_jump = True
 
-    def update(self, movement, y_floor=200):
-        super().update(movement=movement)
-        if self.collisions['down'] == True:
-            self.can_jump = True
+    def update(self, movement, dead, y_floor=200):
+        if not dead:
+            super().update(movement=movement)
+            if self.collisions['down'] == True:
+                if not self.can_jump:
+                    self.game.game_run = True
+                self.can_jump = True
+            else:
+                self.can_jump = False
         else:
-            self.can_jump = False
+            pass
         
     def jump(self):
         if self.can_jump:
-            print(True)
             self.velocity[1] = -3

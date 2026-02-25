@@ -2,8 +2,9 @@ import sys
 
 import pygame
 
-from scripts.util import load_image, load_images
+from scripts.util import load_image, load_images, draw_text
 from scripts.entities import Player
+from scripts.road import Road
 
 class Game:
     def __init__(self):
@@ -17,18 +18,30 @@ class Game:
         self.movement = [False, False]
 
         self.assets = {
-            'player/idle' : load_image('player/idle/01.png')
+            'player/idle' : load_image('player/idle/01.png'),
+            'road': load_image('road.png'),
+            'big_menu_font': pygame.font.Font('data/font/monogram.ttf')
         }
 
-        self.player = Player(self, [50, 50], [32, 18])
+        self.player = Player(self, [50, 200], [32, 18])
+        self.road = Road(self, 200, 2)
 
-        self.x_scroll = 0
+        self.x_scroll = 2
+        self.dead = 0
+        self.game_run = False
+        self.menu = True
 
     def run(self):
         while True:
             self.display.fill((255, 255, 255))
 
-            self.player.update((self.movement[1] - self.movement[0], 0))
+            if self.menu:
+                draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
+
+            self.road.update(self.game_run)
+            self.road.render(self.display)
+
+            self.player.update((self.movement[1] - self.movement[0], 0), self.dead)
             self.player.render(self.display)
 
             for event in pygame.event.get():
@@ -37,8 +50,10 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
+                        self.menu = False
                         self.player.jump()
                     if event.key == pygame.K_UP:
+                       self.menu = False
                        self.player.jump()
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True

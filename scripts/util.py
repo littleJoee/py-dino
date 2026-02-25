@@ -14,6 +14,13 @@ def load_images(path):
         images.append(load_image(path + '/' + img_name))
     return images
 
+def draw_text(text, font, color, surf, x, y):
+    text_obj = font.render(text, 1, color)
+    text_rect = text_obj.get_rect()
+    text_rect.topleft = (x, y)
+    surf.blit(text_obj, text_rect)
+    
+
 class Animation:
     def __init__(self):
         pass
