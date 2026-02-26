@@ -44,6 +44,13 @@ class Entity:
         surf.blit(self.game.assets['player/idle'], (self.pos[0], self.pos[1]))
 
 
+class Cactus(Entity):
+    def __init__(self, game, pos, size):
+        super().__init__(game, 'cactus', pos, size)
+
+    def update(self, y_floor=190, movement=(0, 0)):
+        return super().update(y_floor, movement)
+
 class Player(Entity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)
