@@ -6,6 +6,7 @@ from scripts.util import load_image, load_images, draw_text
 from scripts.entities import Player
 from scripts.road import Road
 from scripts.clouds import Clouds
+from scripts.cactus_spawner import Obstacles
 
 class Game:
     def __init__(self):
@@ -23,15 +24,20 @@ class Game:
             'road': load_image('road.png'),
             'clouds': load_images('clouds'),
             'big_menu_font': pygame.font.Font('data/font/monogram.ttf', 64),
+            'cactus': load_image('obstacles/cactus.png'),
+            'bird': load_images('obstacles/bird'),
         }
 
         self.player = Player(self, [50, 200], [32, 18])
+        self.spawner = Obstacles(self.assets)
+
         self.road = Road(self, 200, 2)
         self.clouds = Clouds(self.assets['clouds'])
 
         self.x_scroll = 2
         self.dead = 0
         self.game_run = True
+        self.game_speed = 0
         self.menu = True
 
     def run(self):
@@ -40,6 +46,9 @@ class Game:
 
             if self.menu:
                 draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
+            
+            speed = 0.1
+            self.game_speed = self.game_run * speed
 
             self.clouds.update()
             self.clouds.render(self.display)
@@ -49,6 +58,9 @@ class Game:
 
             self.player.update((self.movement[1] - self.movement[0], 0), self.dead)
             self.player.render(self.display)
+
+            self.spawner.update(self.game_speed)
+            self.spawner.render(self.display)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
