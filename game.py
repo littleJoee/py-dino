@@ -35,7 +35,7 @@ class Game:
         }
 
         self.player = Player(self, [50, 200], [32, 18])
-        # self.spawner = Obstacles(self.assets)
+        self.spawner = Obstacles(self.assets)
 
         self.road = Road(self, 200, 2)     
 
@@ -54,17 +54,24 @@ class Game:
             if self.menu:
                 draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
 
-            self.clouds.update()
+            if self.dead:
+                self.game_speed = 0
+
+            self.clouds.update(self.dead)
             self.clouds.render(self.display)
 
-            self.road.update(self.game_run)
+            self.road.update(self.game_speed)
             self.road.render(self.display)
+
+            self.spawner.update(self.game_speed)
+            self.spawner.render(self.display)
 
             self.player.update((self.movement[1] - self.movement[0], 0), self.dead)
             self.player.render(self.display)
 
-            #self.spawner.update(self.game_speed)
-            #self.spawner.render(self.display)
+            for obstacle_rect in self.spawner.obstacle_rects():
+                if self.player.rect().collidepoint(obstacle_rect[0], obstacle_rect[1]):
+                    self.dead += 1
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

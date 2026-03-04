@@ -1,4 +1,5 @@
 import random
+from pygame import Rect
 
 class Obstacles:
     '''
@@ -9,9 +10,15 @@ class Obstacles:
         self.obstacles = []
         self.img_width = 32
         self.spawn_timer = random.random()
-        self.available_obstacles = [['cactus', (320 + 32, 200)], ['bird', [(320 + 32, 200), (320 + 32, 170), (320 + 32, 150)]]] # cactus, bird
+        self.available_obstacles = [['cactus', (320 + 32, 190)], ['bird', [(320 + 32, 200), (320 + 32, 170), (320 + 32, 150)]]] # cactus, bird
 
         self.frame = 0
+
+    def obstacle_rects(self):
+        rects = []
+        for obstacle in self.obstacles:
+            rects.append(Rect(obstacle['pos'][0], obstacle['pos'][1], 16, 16)) # (32, 18): obstacle size
+        return rects
 
     def update(self, game_speed):
         self.spawn_timer -= 0.1

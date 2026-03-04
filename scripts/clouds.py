@@ -27,9 +27,10 @@ class Clouds:
         self.clouds.sort(key=lambda x: x.depth)
 
 
-    def update(self):
-        for cloud in self.clouds:
-            cloud.update()
+    def update(self, dead):
+        if not dead:
+            for cloud in self.clouds:
+                cloud.update()
 
     def render(self, surf):
         for cloud in self.clouds:
