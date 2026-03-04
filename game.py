@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from scripts.util import load_image, load_images, draw_text
+from scripts.util import load_image, load_images, draw_text, Animation
 from scripts.entities import Player
 from scripts.road import Road
 from scripts.clouds import Clouds
@@ -20,25 +20,32 @@ class Game:
         self.movement = [False, False]
 
         self.assets = {
-            'player/idle' : load_image('player/idle/01.png'),
+            'player/idle' : Animation(load_image('player/idle/01.png')),
+            'player/run' : Animation(load_images('player/run'), 8),
+            'player/jump' : Animation(load_images('player/jump')),
+            'player/crouch/run' : Animation(load_images('player/crouch/run')),
+            'player/crouch/jump' : Animation(load_images('player/crouch/jump')),
+            'player/hit' : Animation(load_images('player/hit')),
+            'player/death' : Animation(load_images('player/death')),
             'road': load_image('road.png'),
-            'clouds': load_images('clouds'),
+            'clouds': load_image('clouds/0.png'),
             'big_menu_font': pygame.font.Font('data/font/monogram.ttf', 64),
             'cactus': load_image('obstacles/cactus.png'),
             'bird': load_images('obstacles/bird'),
         }
 
         self.player = Player(self, [50, 200], [32, 18])
-        self.spawner = Obstacles(self.assets)
+        # self.spawner = Obstacles(self.assets)
 
-        self.road = Road(self, 200, 2)
+        self.road = Road(self, 200, 2)     
+
         self.clouds = Clouds(self.assets['clouds'])
 
         self.x_scroll = 2
         self.dead = 0
         self.game_run = True
-        self.game_speed = 0
-        self.menu = True
+        self.game_speed = 2
+        self.menu = False
 
     def run(self):
         while True:
@@ -46,9 +53,6 @@ class Game:
 
             if self.menu:
                 draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
-            
-            speed = 0.1
-            self.game_speed = self.game_run * speed
 
             self.clouds.update()
             self.clouds.render(self.display)
@@ -59,8 +63,8 @@ class Game:
             self.player.update((self.movement[1] - self.movement[0], 0), self.dead)
             self.player.render(self.display)
 
-            self.spawner.update(self.game_speed)
-            self.spawner.render(self.display)
+            #self.spawner.update(self.game_speed)
+            #self.spawner.render(self.display)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -73,11 +77,15 @@ class Game:
                     if event.key == pygame.K_UP:
                        self.menu = False
                        self.player.jump()
+                    if event.key == pygame.K_DOWN:
+                        self.player.crouch()
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = True
                 if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_DOWN:
+                        self.player.uncrouch()
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
                     if event.key == pygame.K_RIGHT:

@@ -10,7 +10,14 @@ class Entity:
         self.collisions = {'down': False}
 
         self.action = ''
+        self.is_crouch = False
         self.anim_offset = (0, 0)
+        self.set_action('run')
+
+    def set_action(self, action):
+        if self.action != action:
+            self.action = action
+            self.animation = self.game.assets[self.e_type + '/' + self.action].copy()
 
     def update(self, y_floor=190, movement=(0, 0)):
 
@@ -31,17 +38,16 @@ class Entity:
 
         if self.collisions['down']:
             self.velocity[0] = 0
+        
+        self.animation.update()
 
-    def set_action(self, action):
-        if self.action != action:
-            self.action = action
-            self.animation = self.game.asset[self.e_type + '/' + self.action].copy()
+
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
     def render(self, surf):
-        surf.blit(self.game.assets['player/idle'], (self.pos[0], self.pos[1]))
+        surf.blit(self.animation.img(), (self.pos[0], self.pos[1]))
 
 
 class Cactus(Entity):
@@ -54,20 +60,50 @@ class Cactus(Entity):
 class Player(Entity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)
+        self.air_time = 0
         self.can_jump = True
 
     def update(self, movement, dead, y_floor=200):
-        if not dead:
             super().update(movement=movement)
+
+            self.air_time += 1
             if self.collisions['down'] == True:
+                self.air_time = 0
                 if not self.can_jump:
                     self.game.game_run = True
                 self.can_jump = True
             else:
                 self.can_jump = False
-        else:
-            pass
+
+            if dead:
+                self.set_action('hit')
+            elif self.is_crouch:
+                if self.collisions['down'] == True:
+                    self.set_action('crouch/run')
+                elif self.air_time > 4:
+                    self.set_action('crouch/jump')
+
+            elif self.collisions['down'] == True:
+                self.set_action('run')
+            elif self.air_time > 4:
+                self.set_action('jump')
+                
         
     def jump(self):
         if self.can_jump:
             self.velocity[1] = -3
+
+    def crouch(self):
+        self.is_crouch = True
+        if self.air_time > 5:
+            self.velocity[1] = 5
+
+    def uncrouch(self):
+        self.is_crouch = False
+
+    
+    def death(self):
+        self.set_action('hit')
+        self.transition += 1
+        if self.transition > 60:
+            self.set_action = ('dead')

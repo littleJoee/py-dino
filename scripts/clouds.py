@@ -11,20 +11,20 @@ class Cloud:
 
     def update(self):
         self.pos[0] -= self.speed
+
         if self.pos[0] < -self.img.get_width():
             self.pos[0] = self.screen_width
 
     def render(self, surf):
-        surf.blit(surf, (self.pos[0], self.pos[1]))
+        surf.blit(self.img, self.pos)
 
 class Clouds:
-    def __init__(self, cloud_images, count=16):
+    def __init__(self, img, count=16):
         self.clouds = []
         for i in range(count):
-            self.clouds.append(Cloud([random.random() * 99999, random.random() * 99999], random.random() * 0.5 + 0.5, random.choice(cloud_images), random.random() * 0.6 + 0.2))
+            self.clouds.append(Cloud([360, random.random() * 360], random.random() * 0.5 + 0.5, img, random.random() * 0.6 + 0.2))
 
         self.clouds.sort(key=lambda x: x.depth)
-        print(self.clouds)
 
 
     def update(self):
