@@ -14,7 +14,8 @@ class Game:
 
         pygame.display.set_caption("dino game")
         self.screen = pygame.display.set_mode((640, 480))
-        self.display = pygame.Surface((320, 240))
+        self.display = pygame.Surface((320, 240), pygame.SRCALPHA)
+        self.display_2 = pygame.Surface((320, 240))
         self.clock = pygame.time.Clock()
 
         self.movement = [False, False]
@@ -30,8 +31,10 @@ class Game:
             'road': load_image('road.png'),
             'clouds': load_image('clouds/0.png'),
             'big_menu_font': pygame.font.Font('data/font/monogram.ttf', 64),
+            'mono': pygame.font.Font('data/font/monogram.ttf', 13),
             'cactus': load_image('obstacles/cactus.png'),
             'bird': load_images('obstacles/bird'),
+            'game_over': load_image('game_over.png'),
         }
 
         self.player = Player(self, [50, 200], [32, 18])
@@ -46,16 +49,25 @@ class Game:
         self.game_run = True
         self.game_speed = 2
         self.menu = False
+        self.score = 0
+        self.game_over_timer = 0
+        self.transition = False
+
+    def revive(self):
+         self.dead = False
+         self.score = 0
+         self.spawner = Obstacles(self.assets)
 
     def run(self):
         while True:
             self.display.fill((255, 255, 255))
 
-            if self.menu:
-                draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
-
             if self.dead:
                 self.game_speed = 0
+                self.game_over_timer = max(100, self.game_over_timer + 1)
+            else:
+                self.game_speed = 2
+                self.score += 0.1
 
             self.clouds.update(self.dead)
             self.clouds.render(self.display)
@@ -67,11 +79,24 @@ class Game:
             self.spawner.render(self.display)
 
             self.player.update((self.movement[1] - self.movement[0], 0), self.dead)
-            self.player.render(self.display)
 
             for obstacle_rect in self.spawner.obstacle_rects():
                 if self.player.rect().collidepoint(obstacle_rect[0], obstacle_rect[1]):
                     self.dead += 1
+                    self.transition = True
+
+            if self.dead:
+                self.display.fill((0, 0, 0))
+
+            self.display_2.blit(self.display, (0, 0))
+            self.player.render(self.display_2)
+
+            if self.game_over_timer > 60:
+                self.display_2.blit(self.assets['game_over'], (160, 100))
+                draw_text('PRESS SPACE TO RESTART', self.assets['mono'], (255, 255, 255), self.display_2, 130, 230)
+
+                #draw_text('PY DINO', self.assets['big_menu_font'], (0, 0, 0), self.display, 160, 100)
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -80,10 +105,10 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.menu = False
-                        self.player.jump()
+                        self.player.jump(self.dead)
                     if event.key == pygame.K_UP:
                        self.menu = False
-                       self.player.jump()
+                       self.player.jump(self.dead)
                     if event.key == pygame.K_DOWN:
                         self.player.crouch()
                     if event.key == pygame.K_LEFT:
@@ -93,12 +118,14 @@ class Game:
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_DOWN:
                         self.player.uncrouch()
+                    if event.key == pygame.K_UP and self.dead:
+                         self.run()
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = False
 
-            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
+            self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)
                     

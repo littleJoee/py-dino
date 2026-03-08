@@ -89,14 +89,18 @@ class Player(Entity):
                 self.set_action('jump')
                 
         
-    def jump(self):
-        if self.can_jump:
-            self.velocity[1] = -3
+    def jump(self, dead):
+        if not dead:
+            if self.can_jump:
+                self.velocity[1] = -3
+        else:
+            self.game.revive()
 
-    def crouch(self):
-        self.is_crouch = True
-        if self.air_time > 5:
-            self.velocity[1] = 5
+    def crouch(self, dead):
+        if not dead:
+            self.is_crouch = True
+            if self.air_time > 5:
+                self.velocity[1] = 5
 
     def uncrouch(self):
         self.is_crouch = False
