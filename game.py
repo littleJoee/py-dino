@@ -110,7 +110,7 @@ class Game:
                        self.menu = False
                        self.player.jump(self.dead)
                     if event.key == pygame.K_DOWN:
-                        self.player.crouch()
+                        self.player.crouch(self.dead)
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = True
                     if event.key == pygame.K_RIGHT:
