@@ -7,6 +7,7 @@ from scripts.entities import Player
 from scripts.road import Road
 from scripts.clouds import Clouds
 from scripts.cactus_spawner import Obstacles
+from scripts.score_ui import Score
 
 class Game:
     def __init__(self):
@@ -32,6 +33,7 @@ class Game:
             'clouds': load_image('clouds/0.png'),
             'big_menu_font': pygame.font.Font('data/font/monogram.ttf', 64),
             'mono': pygame.font.Font('data/font/monogram.ttf', 13),
+            'score': pygame.font.Font('data/font/monogram.ttf', 16),
             'cactus': load_image('obstacles/cactus.png'),
             'bird': load_images('obstacles/bird'),
             'game_over': load_image('game_over.png'),
@@ -44,18 +46,19 @@ class Game:
 
         self.clouds = Clouds(self.assets['clouds'])
 
+        self.score_ui = Score(self.assets['score'])
+
         self.x_scroll = 2
         self.dead = 0
         self.game_run = True
         self.game_speed = 2
         self.menu = False
-        self.score = 0
         self.game_over_timer = 0
         self.transition = False
 
     def revive(self):
          self.dead = False
-         self.score = 0
+         self.score_ui.reset()
          self.spawner = Obstacles(self.assets)
 
     def run(self):
@@ -67,7 +70,6 @@ class Game:
                 self.game_over_timer = max(100, self.game_over_timer + 1)
             else:
                 self.game_speed = 2
-                self.score += 0.1
 
             self.clouds.update(self.dead)
             self.clouds.render(self.display)
@@ -84,12 +86,16 @@ class Game:
                 if self.player.rect().collidepoint(obstacle_rect[0], obstacle_rect[1]):
                     self.dead += 1
                     self.transition = True
+                    
+            self.score_ui.update(self.dead)
+            self.score_ui.render(self.display, self.display_2)
 
             if self.dead:
                 self.display.fill((0, 0, 0))
 
             self.display_2.blit(self.display, (0, 0))
             self.player.render(self.display_2)
+            
 
             if self.game_over_timer > 60:
                 self.display_2.blit(self.assets['game_over'], (160, 100))
